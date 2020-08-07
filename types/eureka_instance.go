@@ -11,9 +11,14 @@ import (
 )
 
 func CreateEurekaRegister() (*EurekaInstanceCreate, error) {
-	currentIp, err := network.FindCurrentIp()
-	if err != nil {
-		return nil, err
+	var currentIp string
+	var err error
+	currentIp = os.Getenv("ip")
+	if currentIp == "" {
+		currentIp, err = network.FindCurrentIp()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	instanceId, err := createInstanceId(currentIp)
