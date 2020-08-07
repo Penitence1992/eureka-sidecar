@@ -4,19 +4,9 @@ build_image:
   stage: build_image
   image: docker:stable
   variables:
-    DOCKER_HOST: tcp://127.0.0.1:2375
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_DRIVER: overlay2
-    REGISTRY_MIRROR: "http://10.10.100.110:65001"
-    DOCKER_DAEMON_OPTIONS: "--insecure-registry=${EXTERNAL_REGISTRY} --registry-mirror=${REGISTRY_MIRROR} "
     EXTERNAL_REGISTRY: pdocker.ascs.tech
     BUILD_ARTIFACTS_PATH: .
-  services:
-    - name: docker:dind
-      entrypoint:
-        - sh
-        - -c
-        - dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS
+
   script:
     - BUILD_STAMP=$(date -u '+%Y-%m-%d_%I:%M:%S%p')
     - TAG=$(if [ "${CI_COMMIT_REF_NAME}" = "master" ]; then echo latest ; else echo ${CI_COMMIT_REF_NAME} ;fi | sed 's|\/|-|g' )
