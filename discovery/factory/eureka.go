@@ -47,7 +47,7 @@ func CreateEurekaDiscovers() ([]*eureka.Register, error) {
 func ipSupplier() string {
 	ip, err := network.FindCurrentIp()
 	if err != nil {
-		log.Warningf("获取当前ip失败:%v, 使用127.0.0.1这个ip\n", err)
+		log.Warningf("获取当前ip失败:%v, 使用127.0.0.1这个ip", err)
 		ip = "127.0.0.1"
 	}
 	return ip

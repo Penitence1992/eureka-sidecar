@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"org.penitence/eureka-sidecar/discovery"
 	_ "org.penitence/eureka-sidecar/env"
 	"org.penitence/eureka-sidecar/types"
 	"strconv"
@@ -22,7 +23,7 @@ const ApplicationJson = "application/json"
 type Register struct {
 	BaseUrl  string
 	Instance *types.EurekaInstanceCreate
-	client *http.Client
+	client   *http.Client
 }
 
 func CreateRegister(baseUrl string, create *types.EurekaInstanceCreate) *Register {
@@ -32,7 +33,7 @@ func CreateRegister(baseUrl string, create *types.EurekaInstanceCreate) *Registe
 	return &Register{
 		BaseUrl:  baseUrl,
 		Instance: create,
-		client: c,
+		client:   c,
 	}
 }
 
@@ -61,7 +62,7 @@ func (r *Register) CreateInstance() (bool, error) {
 		return false, err
 	}
 	b, _ := ioutil.ReadAll(reps.Body)
-	log.Infof("创建app应用实例, 响应code为: %d\n", reps.StatusCode)
+	log.Infof("创建app应用实例, 响应code为: %d", reps.StatusCode)
 	if isSuccess(reps.StatusCode) {
 		return true, nil
 	}
@@ -79,11 +80,11 @@ func (r *Register) Heartbeat() (bool, error) {
 		return false, err
 	} else {
 		b, _ := ioutil.ReadAll(reps.Body)
-		log.Infof("更新app实例, 响应code为: %d\n", reps.StatusCode)
+		log.Infof("更新app实例, 响应code为: %d", reps.StatusCode)
 		if isSuccess(reps.StatusCode) {
 			return true, nil
 		} else {
-			return false, errors.New(string(b))
+			return false, discovery.NewError(string(b), reps.StatusCode)
 		}
 	}
 }
@@ -99,7 +100,7 @@ func (r *Register) RemoveInstance() (bool, error) {
 		return false, nil
 	} else {
 		b, _ := ioutil.ReadAll(reps.Body)
-		log.Infof("删除app实例, 响应code为: %d\n", reps.StatusCode)
+		log.Infof("删除app实例, 响应code为: %d", reps.StatusCode)
 		if isSuccess(reps.StatusCode) {
 			return true, nil
 		} else {

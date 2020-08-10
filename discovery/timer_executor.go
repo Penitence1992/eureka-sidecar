@@ -31,7 +31,7 @@ func (e *Executor) Start() {
 	go func() {
 		select {
 		case sg := <-e.sign:
-			log.Infof("时间执行器接收到信号:%s\n", sg)
+			log.Infof("时间执行器接收到信号:%s", sg)
 			e.interrupt = true
 			return
 		}
@@ -47,7 +47,7 @@ func (e *Executor) Start() {
 			}
 			time.Sleep(5 * time.Second)
 			continue
-		}else {
+		} else {
 			log.Info("注册实例成功")
 		}
 		log.Info("开始进行心跳发送")
@@ -71,7 +71,7 @@ func (e *Executor) Start() {
 func (e *Executor) doRegisterAppInstance() bool {
 	result, err := e.register.CreateInstance()
 	if err != nil {
-		log.Errorf("注册app实例失败: %v\n", err)
+		log.Errorf("注册app实例失败: %v", err)
 		return false
 	}
 	return result
@@ -80,14 +80,24 @@ func (e *Executor) doRegisterAppInstance() bool {
 func (e *Executor) doOnHeartbeat() {
 	_, err := e.register.Heartbeat()
 	if err != nil {
-		log.Errorf("心跳发送失败: %v\n", err)
-		e.errorCount++
+		switch e2 := err.(type) {
+		case *HttpError:
+			if e2.Code == 404 {
+				log.Error("App未创建, 导致心跳发送失败, 重新创建App")
+				e.errorCount += 100
+				return
+			}
+		default:
+			log.Errorf("心跳发送失败: %v", err)
+			e.errorCount++
+		}
+
 	}
 }
 
 func (e *Executor) doOnDone() {
 	_, err := e.register.RemoveInstance()
 	if err != nil {
-		log.Errorf("注册app失败: %v\n", err)
+		log.Errorf("注册app失败: %v", err)
 	}
 }

@@ -29,7 +29,7 @@ func main() {
 	for {
 		select {
 		case sg := <-done:
-			log.Infof("主线程接收到信号:%s\n", sg)
+			log.Infof("主线程接收到信号:%s", sg)
 			taskGroup.Wait()
 			os.Exit(0)
 		}
@@ -51,6 +51,6 @@ func runAsync(clients []discovery.Discovery, period time.Duration, group *sync.W
 
 func printVersionInfo() {
 	log.Infoln("Starting Web hook handler --->")
-	log.Infof("Git Commit : %s\n", gitCommit)
-	log.Infof("Build Stamp : %s\n", buildStamp)
+	log.Infof("Git Commit : %s", gitCommit)
+	log.Infof("Build Stamp : %s", buildStamp)
 }
