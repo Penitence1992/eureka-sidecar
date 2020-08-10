@@ -2,6 +2,7 @@ package discovery
 
 import (
 	log "github.com/sirupsen/logrus"
+	"org.penitence/eureka-sidecar/errors"
 	"org.penitence/eureka-sidecar/runner"
 	"os"
 	"time"
@@ -81,7 +82,7 @@ func (e *Executor) doOnHeartbeat() {
 	_, err := e.register.Heartbeat()
 	if err != nil {
 		switch e2 := err.(type) {
-		case *HttpError:
+		case *errors.HttpError:
 			if e2.Code == 404 {
 				log.Error("App未创建, 导致心跳发送失败, 重新创建App")
 				e.errorCount += 100

@@ -10,8 +10,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"org.penitence/eureka-sidecar/discovery"
 	_ "org.penitence/eureka-sidecar/env"
+	es "org.penitence/eureka-sidecar/errors"
 	"org.penitence/eureka-sidecar/types"
 	"strconv"
 	"strings"
@@ -84,7 +84,7 @@ func (r *Register) Heartbeat() (bool, error) {
 		if isSuccess(reps.StatusCode) {
 			return true, nil
 		} else {
-			return false, discovery.NewError(string(b), reps.StatusCode)
+			return false, es.NewError(string(b), reps.StatusCode)
 		}
 	}
 }
