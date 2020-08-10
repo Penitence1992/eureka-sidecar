@@ -30,6 +30,8 @@ func (e EurekaStatus) String() string {
 	}
 }
 
+
+
 type EurekaInstanceCreate struct {
 	Instance EurekaInstance `json:"instance"`
 }
@@ -78,4 +80,10 @@ type EurekaLeaseInfo struct {
 	LastRenewalTimestamp  int64 `json:"lastRenewalTimestamp"`
 	EvictionTimestamp     int64 `json:"evictionTimestamp"`
 	ServiceUpTimestamp    int64 `json:"serviceUpTimestamp"`
+}
+
+// 更新LeaseInfo中的时间内容
+func (i *EurekaLeaseInfo) Renew() {
+	i.RegistrationTimestamp = FindCurrentTimestampToMillisecond()
+	i.ServiceUpTimestamp = FindCurrentTimestampToMillisecond()
 }

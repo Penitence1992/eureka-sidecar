@@ -1,31 +1,23 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"math"
-	"org.penitence/eureka-sidecar/utils/network"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
 
-func CreateEurekaRegister() (*EurekaInstanceCreate, error) {
-	var currentIp string
+func CreateEurekaRegister(ip string, port int, appName string) (*EurekaInstanceCreate, error) {
 	var err error
-	currentIp = os.Getenv("ip")
-	if currentIp == "" {
-		currentIp, err = network.FindCurrentIp()
-		if err != nil {
-			return nil, err
-		}
+	if ip == "" {
+		return nil, errors.New("ip不能为空")
 	}
-
-	instanceId, err := createInstanceId(currentIp)
-	if err != nil {
-		return nil, err
+	if port <= 0 || port > 65535 {
+		return nil, errors.New("端口访问错误")
 	}
-	p, err := strconv.Atoi(findEnvOrDefault("port", "8080"))
+	instanceId, err := createInstanceId(ip, appName)
 	if err != nil {
 		return nil, err
 	}
@@ -33,12 +25,12 @@ func CreateEurekaRegister() (*EurekaInstanceCreate, error) {
 		Instance: EurekaInstance{
 			InstanceId:       instanceId,
 			App:              strings.ToUpper(os.Getenv("app")),
-			HostName:         currentIp,
-			IpAddr:           currentIp,
+			HostName:         ip,
+			IpAddr:           ip,
 			Status:           UP,
 			OverriddenStatus: UNKNOWN,
 			Port: EurekaPort{
-				Port:    p,
+				Port:    port,
 				Enabled: true,
 			},
 			SecurePort: EurekaPort{
@@ -57,13 +49,13 @@ func CreateEurekaRegister() (*EurekaInstanceCreate, error) {
 				ServiceUpTimestamp:    FindCurrentTimestampToMillisecond(),
 			},
 			Metadata: map[string]string{
-				"management.port": string(p),
+				"management.port": string(port),
 			},
-			HomePageUrl:                   createHomePageUrl(currentIp, p),
-			StatusPageUrl:                 createStatusPageUrl(currentIp, p),
-			HealthCheckUrl:                createHealthCheckUrl(currentIp, p),
-			VipAddress:                    os.Getenv("app"),
-			SecureVipAddress:              os.Getenv("app"),
+			HomePageUrl:                   createHomePageUrl(ip, port),
+			StatusPageUrl:                 createStatusPageUrl(ip, port),
+			HealthCheckUrl:                createHealthCheckUrl(ip, port),
+			VipAddress:                    appName,
+			SecureVipAddress:              appName,
 			IsCoordinatingDiscoveryServer: "false",
 			LastUpdatedTimestamp:          FindCurrentTimestampToMillisecond(),
 			LastDirtyTimestamp:            FindCurrentTimestampToMillisecond(),
@@ -71,8 +63,7 @@ func CreateEurekaRegister() (*EurekaInstanceCreate, error) {
 	}, nil
 }
 
-func createInstanceId(ip string) (string, error) {
-	appName := os.Getenv("app")
+func createInstanceId(ip, appName string) (string, error) {
 	var err error
 	if appName == "" {
 		appName, err = os.Hostname()
@@ -81,14 +72,6 @@ func createInstanceId(ip string) (string, error) {
 		}
 	}
 	return fmt.Sprintf("%s:%s", appName, ip), nil
-}
-
-func findEnvOrDefault(envname string, defaultV string) (v string) {
-	v = os.Getenv(envname)
-	if v == "" {
-		return defaultV
-	}
-	return
 }
 
 func FindCurrentTimestampToMillisecond() int64 {

@@ -1,0 +1,27 @@
+注册到eureka相关的活动图
+@startuml
+start
+:加载环境变量;
+:根据**zoneUrl**的值通过**(,)**来分割出eureka集群内容;
+:构建sidecar的基本信息类;
+:创建相关的协程进行处理;
+fork
+ :协程处理;
+    repeat
+        :注册App应用到eureka中;
+        if (注册对应的App实例是否成功) then (注册成功)
+            repeat
+               :发送心跳更新eureka实例信息;
+            backward: 心跳失败次数+1;
+            repeat while (心跳失败次数少于n次)
+        else
+        endif
+    repeat while (没接收到中断信号)
+fork again
+:等待接收中断信号;
+end fork
+repeat
+:等待别的协程完成;
+repeat while (还有协程未完成)
+stop
+@enduml
